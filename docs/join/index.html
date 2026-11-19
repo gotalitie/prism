@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Rejoindre avec Prism</title>
+<meta property="og:title" content="Rejoins-moi sur FiveM avec Prism">
+<meta property="og:description" content="Un clic : Prism installe le bon pack graphique et te connecte au serveur.">
+<meta property="og:image" content="https://gotalitie.github.io/prism/icon.png">
+<meta name="theme-color" content="#1b2130">
+<link rel="icon" href="../icon.png">
+<style>
+  :root { --bg: #eef1f6; --card: rgba(255,255,255,.78); --line: rgba(20,30,50,.10); --t1: #121826; --t2: #4b5568; --t3: #7a8496; --btn: #121826; --btn-t: #fff; --ok: #138a55; --warn: #a86400; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #11151f; --card: rgba(30,36,50,.82); --line: rgba(255,255,255,.10); --t1: #f3f5fa; --t2: #b4bccb; --t3: #848ea0; --btn: #fff; --btn-t: #121826; --ok: #5fe3a1; --warn: #ffc864; } }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; background: radial-gradient(1200px 600px at 20% -10%, rgba(120,150,210,.28), transparent 60%), radial-gradient(900px 500px at 110% 110%, rgba(160,190,240,.22), transparent 60%), var(--bg); color: var(--t1); font: 15px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif; }
+  .card { width: 100%; max-width: 440px; padding: 28px; border-radius: 24px; background: var(--card); border: 1px solid var(--line); box-shadow: 0 30px 80px rgba(10,20,40,.18); backdrop-filter: blur(18px); }
+  .top { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+  .top img { width: 40px; height: 40px; border-radius: 11px; }
+  .top b { font-size: 17px; letter-spacing: -.01em; }
+  .top small { display: block; color: var(--t3); font-size: 12.5px; }
+  h1 { margin: 0 0 6px; font-size: 24px; line-height: 1.2; letter-spacing: -.02em; overflow-wrap: anywhere; }
+  .addr { margin: 0; color: var(--t3); font: 13px/1.4 ui-monospace, Consolas, monospace; overflow-wrap: anywhere; }
+  .pack { margin: 18px 0 0; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); }
+  .pack span { display: block; font-size: 12px; color: var(--t3); }
+  .pack b { overflow-wrap: anywhere; }
+  .actions { display: flex; flex-direction: column; gap: 10px; margin-top: 22px; }
+  a.btn { display: flex; align-items: center; justify-content: center; gap: 8px; height: 46px; border-radius: 999px; font-weight: 600; text-decoration: none; color: var(--t1); border: 1px solid var(--line); }
+  a.btn.main { background: var(--btn); color: var(--btn-t); border-color: transparent; }
+  a.btn:focus-visible { outline: 2px solid #6aa0ff; outline-offset: 2px; }
+  .hint { margin: 16px 0 0; font-size: 13px; color: var(--t2); }
+  .hint.err { color: var(--warn); }
+  .sep { margin: 22px 0 0; padding-top: 18px; border-top: 1px solid var(--line); font-size: 13px; color: var(--t2); }
+  .sep a { color: inherit; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main class="card">
+  <div class="top"><img src="../icon.png" alt=""><div><b>Prism</b><small>Packs graphiques pour FiveM</small></div></div>
+
+  <section id="ok" hidden>
+    <h1 id="title">Rejoindre le serveur</h1>
+    <p class="addr" id="addr"></p>
+    <div class="pack" id="packBox" hidden><span>Pack de ton pote</span><b id="pack"></b></div>
+    <div class="actions">
+      <a class="btn main" id="open" href="#">Ouvrir dans Prism</a>
+      <a class="btn" href="https://github.com/gotalitie/prism/releases/latest">Je n'ai pas Prism : le télécharger</a>
+    </div>
+    <p class="hint" id="hint">Ton navigateur va te demander d'ouvrir Prism : accepte, et Prism te propose de rejoindre avec le bon pack.</p>
+    <p class="sep">Pas envie d'installer Prism ? <a id="direct" href="#">Rejoindre directement dans FiveM</a> (sans pack).</p>
+  </section>
+
+  <section id="bad" hidden>
+    <h1>Lien incomplet</h1>
+    <p class="hint err">Ce lien d'invitation est abîmé. Demande à ton pote de recopier le lien depuis Prism (bouton « Inviter »).</p>
+    <div class="actions"><a class="btn" href="https://github.com/gotalitie/prism/releases/latest">Télécharger Prism</a></div>
+  </section>
+</main>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var clean = function (s, max) { return String(s || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, max); };
+  var a = String(q.get('a') || '').trim().replace(/^connect\s+/i, '').replace(/^fivem:\/\/connect\//i, '').replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/\/+$/, '');
+  var okAddr = /^(cfx\.re\/join\/[a-z0-9]{3,12}|[a-z0-9]{6}|[a-z0-9][a-z0-9.-]{0,90}(:\d{1,5})?)$/i.test(a);
+  if (!okAddr) { document.getElementById('bad').hidden = false; return; }
+  var n = clean(q.get('n'), 40) || a;
+  var p = clean(q.get('p'), 60);
+  var f = String(q.get('f') || '').toLowerCase();
+  if (!/^([a-f0-9]{16}|vanilla)$/.test(f)) f = '';
+  var out = new URLSearchParams();
+  out.set('a', a); out.set('n', n); if (p) out.set('p', p); if (f) out.set('f', f);
+  var app = 'prismapp://join?' + out.toString();
+
+  document.getElementById('ok').hidden = false;
+  document.getElementById('title').textContent = 'Rejoindre ' + n;
+  document.getElementById('addr').textContent = a;
+  if (p || f === 'vanilla') { document.getElementById('packBox').hidden = false; document.getElementById('pack').textContent = p || 'Vanilla GTA (sans pack)'; }
+  document.title = 'Rejoindre ' + n + ' avec Prism';
+  document.getElementById('open').href = app;
+  document.getElementById('direct').href = 'fivem://connect/' + a;
+  // Ouverture automatique de Prism (le navigateur demande la permission).
+  setTimeout(function () { location.href = app; }, 350);
+})();
+</script>
+</body>
+</html>
